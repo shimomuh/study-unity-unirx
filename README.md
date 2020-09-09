@@ -24,3 +24,11 @@ UnityWebRequest の送受信プログラムは非同期実装のため、普通�
 ### 考察
 
 ストリームの処理がフレーム遅延しないのは、万一ストリーム内の処理が異常に重い場合に描画や物理演算など、後続の処理も遅延させてしまうためアプリ全体がフリーズしてしまうのを防ぐためだと思われる。
+
+## FromCoroutineSample と WhenAllSample
+
+### 検証内容
+
+シンプルにどういう挙動をするかの検証
+
+![](./doc/images/FromCorotineSampleNWhenAllSample.gif)
