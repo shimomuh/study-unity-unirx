@@ -5,6 +5,7 @@ using UniRxSample;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 namespace Ui
 {
@@ -23,6 +24,9 @@ namespace Ui
             AddLabel("WhenAllSample");
             AddAction("ReturnUnit あり", WhenAllEitherReturnUnitSample);
             AddAction("両方 FromCoroutine", WhenAllBothCorotineSample);
+
+            AddLabel("IEnumerable -> Observable -> Last で1ストリームにして実行");
+            AddAction("実行", ToObservableAndLastSample);
         }
         
         #region UnityWebRequest
@@ -122,6 +126,31 @@ namespace Ui
 
             Debug.Log("2s finished.");
             
+        }
+
+        private void  ToObservableAndLastSample()
+        {
+            Observable.ReturnUnit()
+                .SelectMany(_ => EnumerableToObservable())
+                .Subscribe();
+        }
+        
+        private IObservable<int> EnumerableToObservable()
+        {
+            return Increment().ToObservable()
+                .Do(id => Debug.Log($"{id} frame passed."))
+                .Last()
+                .Do(_ => Debug.Log("finished!"));
+        }
+
+        private IEnumerable<int> Increment()
+        {
+            int id = 0;
+            while (true)
+            {
+                yield return ++id;
+                if (id == 5) { break; }
+            }
         }
     }
 }
