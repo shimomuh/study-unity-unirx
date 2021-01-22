@@ -32,3 +32,68 @@ UnityWebRequest の送受信プログラムは非同期実装のため、普通�
 シンプルにどういう挙動をするかの検証
 
 ![](./doc/images/FromCorotineSampleNWhenAllSample.gif)
+
+## IEnumerable を ToObservable して Subscribe する
+
+### 検証内容
+
+繰り返し実行したいストリームがあったときに Repeat とか使えばいいのかなとか勝手に妄想したけどうまく使いこなせなかった。
+
+そこで教えてもらった IEnumerable を ToObservable する処理方法で数回繰り返したい処理を
+
+```csharp
+Observable.ReturnUnit()
+  .SelectMany(_ => {
+    return Observable.ReturnUnit()
+      .SelectMany(__ => 実行したい処理)
+      .SelectMany(__ => 実行したい処理)
+      .SelectMany(__ => 実行したい処理)
+  })
+  .Subscribe();
+```
+
+みたいな書き方をしていた(オペレータは下のようになんでもよい)
+
+```csharp
+Observable.ReturnUnit()
+  .SelectMany(_ => {
+    return Observable.ReturnUnit()
+      .Do(__ => 実行したい処理)
+      .Do(__ => 実行したい処理)
+      .Do(__ => 実行したい処理)
+  })
+  .Subscribe();
+```
+
+これを実行したい回数だけ書かないようにする
+
+```csharp
+Observable.ReturnUnit()
+  .SelectMany(_ => {
+    return RepeatFunc().ToObservable() // IObservable<Unit>
+      .SelectMany(__ => 実行したい処理) // IObservable<実行結果の方>
+  })
+  .Subscribe();
+```
+
+と
+
+```csharp
+private IEnumerable<Unit> RepeatFunc()
+{
+  int id = 0;
+  int repeatNum = 3;
+  while(true)
+  {
+    id++;
+    yield return Unit.Default; // IEnumerator の yield return null みたいだが、繰り返すだけの関数なのでフレームは経過しない
+    if (id == repeatNum) { break; }
+  }
+}
+```
+
+として実現した。
+
+実行結果を以下に載せる。
+
+![](./doc/images/IEnumerableToObservable.gif)

@@ -138,7 +138,7 @@ namespace Ui
         private IObservable<int> EnumerableToObservable()
         {
             return Increment().ToObservable()
-                .Do(id => Debug.Log($"{id} frame passed."))
+                .Do(id => Debug.Log($"{id} passed. (no frame spent)"))
                 .Last()
                 .Do(_ => Debug.Log("finished!"));
         }
